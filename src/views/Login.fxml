@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<AnchorPane prefHeight="500.0" prefWidth="850.0" style="-fx-background-color: #FCFAFA;" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
+    <children>
+        <AnchorPane prefHeight="503.0" prefWidth="382.0" style="-fx-background-color: #05071F;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label alignment="CENTER" layoutX="106.0" layoutY="266.0" prefHeight="23.0" prefWidth="173.0" text="Auction" textFill="WHITE">
+                    <font>
+                        <Font size="40.0" />
+                    </font>
+                </Label>
+                <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="117.0" layoutY="102.0" pickOnBounds="true" preserveRatio="true">
+                   <image>
+                      <Image url="@../images/auction.png" />
+                   </image>
+                </ImageView>
+            </children>
+        </AnchorPane>
+        <Pane layoutX="491.0" layoutY="87.0" style="-fx-background-color: #FCFAFA;" AnchorPane.bottomAnchor="86.0" AnchorPane.topAnchor="87.0">
+            <children>
+                <Label layoutX="46.0" text="Log in to Auction">
+                    <font>
+                        <Font size="24.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="txtUsername" layoutX="7.0" layoutY="70.0" prefHeight="34.0" prefWidth="275.0" promptText="username" />
+                <PasswordField fx:id="txtPassword" layoutX="7.0" layoutY="113.0" prefHeight="34.0" prefWidth="275.0" promptText="password"/>
+                <Label fx:id="label_status" alignment="CENTER" layoutX="7.0" layoutY="165.0" prefHeight="23.0" prefWidth="275.0" textFill="#ff6354">
+                    <font>
+                        <Font size="10.0" />
+                    </font>
+                </Label>
+                <Button fx:id="btnSignIn" layoutX="4.0" layoutY="215.0" mnemonicParsing="false" onMouseClicked="#signInButtonAction" prefHeight="34.0" prefWidth="275.0" stylesheets="@../style/style.css" text="Sign In" />
+                <Separator layoutY="270.0" prefHeight="7.0" prefWidth="275.0" />
+                <Label alignment="CENTER" layoutX="122.0" layoutY="262.0" prefHeight="23.0" prefWidth="31.0" style="-fx-background-color: #FCFAFA;" text="or" textFill="#5b5a5a">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <Button fx:id="btnSignUp" layoutX="4.0" layoutY="296.0" mnemonicParsing="false" onMouseClicked="#signUpButtonAction" prefHeight="34.0" prefWidth="275.0" stylesheets="@../style/style.css" text="Sign Up" />
+            </children>
+        </Pane>
+    </children>
+</AnchorPane>

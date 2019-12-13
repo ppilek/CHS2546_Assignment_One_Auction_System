@@ -1,4 +1,4 @@
-# Auction System for CHS2546 - Distributed and Client Server Systems module
+# Auction System - CHS2546, Distributed and Client Server Systems
 
 // ToDo - project description
 

@@ -8,22 +8,28 @@ public class LotEntry implements Entry {
     public String userSeller;
     public String title;
     public String description;
-    public Double price;
+    public Double originalPrice;
+    public Double soldPrice;
+    public String status;
+    public String userBuyer;
 
     public LotEntry() {
         // no arg constructor
     }
 
-    public LotEntry(Integer index, String userSeller, String title, String description, Double price) {
+    public LotEntry(Integer index) {
+        this.index = index;
+    }
+
+    public LotEntry(Integer index, String userSeller, String title, String description, Double originalPrice, Boolean isBid, Double soldPrice, String status, String userBuyer) {
         this.index = index;
         this.userSeller = userSeller;
         this.title = title;
         this.description = description;
-        this.price = price;
-    }
-
-    public LotEntry(Integer index) {
-        this.index = index;
+        this.originalPrice = originalPrice;
+        this.soldPrice = soldPrice;
+        this.status = status;
+        this.userBuyer = userBuyer;
     }
 
     public Integer getIndex() {
@@ -58,12 +64,36 @@ public class LotEntry implements Entry {
         this.description = description;
     }
 
-    public Double getPrice() {
-        return price;
+    public Double getOriginalPrice() {
+        return originalPrice;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setOriginalPrice(Double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public Double getSoldPrice() {
+        return soldPrice;
+    }
+
+    public void setSoldPrice(Double soldPrice) {
+        this.soldPrice = soldPrice;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getUserBuyer() {
+        return userBuyer;
+    }
+
+    public void setUserBuyer(String userBuyer) {
+        this.userBuyer = userBuyer;
     }
 
     @Override
@@ -73,7 +103,10 @@ public class LotEntry implements Entry {
                 ", userSeller='" + userSeller + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", price=" + price +
+                ", originalPrice=" + originalPrice +
+                ", soldPrice=" + soldPrice +
+                ", status='" + status + '\'' +
+                ", userBuyer='" + userBuyer + '\'' +
                 '}';
     }
 }

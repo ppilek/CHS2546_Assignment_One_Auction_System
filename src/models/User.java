@@ -5,16 +5,18 @@ public class User {
     public int index;
     public String username, password;
     public boolean isSingIn;
+    public double balance;
 
     public User() {
 
     }
 
-    public User(int index, String username, String password, boolean isSingIn) {
+    public User(int index, String username, String password, boolean isSingIn, double balance) {
         this.index = index;
         this.username = username;
         this.password = password;
         this.isSingIn = isSingIn;
+        this.balance = balance;
     }
 
     public int getIndex() {
@@ -49,6 +51,14 @@ public class User {
         isSingIn = singIn;
     }
 
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -56,6 +66,7 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", isSingIn=" + isSingIn +
+                ", balance=" + balance +
                 '}';
     }
 }

@@ -13,6 +13,10 @@ public class BidEntry implements Entry {
         // no arg constructor
     }
 
+    public BidEntry(Integer lotIndex) {
+        this.lotIndex = lotIndex;
+    }
+
     public BidEntry(Integer index, Integer lotIndex, Double bidValue, String userBuyer) {
         this.index = index;
         this.lotIndex = lotIndex;

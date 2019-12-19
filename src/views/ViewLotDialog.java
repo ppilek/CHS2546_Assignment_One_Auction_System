@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 public class ViewLotDialog implements Initializable  {
 
     @FXML
-    private TextField indexField, sellerField, titleField, priceField;
+    private TextField indexField, sellerField, titleField, originalPriceField, soldPriceField, statusField;
     @FXML
     private TextArea descriptionField;
     @FXML
@@ -36,7 +36,9 @@ public class ViewLotDialog implements Initializable  {
         sellerField.setEditable(false);
         titleField.setEditable(false);
         descriptionField.setEditable(false);
-        priceField.setEditable(false);
+        originalPriceField.setEditable(false);
+        soldPriceField.setEditable(false);
+        statusField.setEditable(false);
 
         bits_data = FXCollections.observableArrayList();
         initTable();
@@ -61,8 +63,18 @@ public class ViewLotDialog implements Initializable  {
         sellerField.setText(lot.getUserSeller());
         titleField.setText(lot.getTitle());
         descriptionField.setText(lot.getDescription());
-        priceField.setText(lot.getPrice());
+        originalPriceField.setText(lot.getOriginalPrice());
+        soldPriceField.setText(lot.getSoldPrice());
+        statusField.setText(lot.getStatus());
 
         loadData(bitController, bits_data, Integer.parseInt(lot.getIndex()));
     }
+
+    public TableView<Bid> getBid_table() {
+        return bid_table;
+    }
+
+//    public void setBid_table(TableView<Bid> bid_table) {
+//        this.bid_table = bid_table;
+//    }
 }

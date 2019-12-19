@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class BidLotDialog implements Initializable {
 
     @FXML
-    private TextField indexField, sellerField, titleField, priceField, bitField;
+    private TextField indexField, sellerField, titleField, originalPrice, bitField;
     @FXML
     private TextArea descriptionField;
     @FXML
@@ -27,7 +27,7 @@ public class BidLotDialog implements Initializable {
         sellerField.setEditable(false);
         titleField.setEditable(false);
         descriptionField.setEditable(false);
-        priceField.setEditable(false);
+        originalPrice.setEditable(false);
     }
 
     public void showSelectedLot(Lot lot) {
@@ -35,7 +35,7 @@ public class BidLotDialog implements Initializable {
         sellerField.setText(lot.getUserSeller());
         titleField.setText(lot.getTitle());
         descriptionField.setText(lot.getDescription());
-        priceField.setText(lot.getPrice());
+        originalPrice.setText(lot.getOriginalPrice());
     }
 
     public void bidSelectedLot(BidController bidController, String username) {

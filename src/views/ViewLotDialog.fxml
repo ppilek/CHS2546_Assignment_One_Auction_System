@@ -22,7 +22,13 @@
             <TextArea fx:id="descriptionField" prefHeight="100.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
             <Label text="Original Price: " GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <TextField fx:id="priceField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="originalPriceField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+            <Label text="Sold Price: " GridPane.columnIndex="0" GridPane.rowIndex="5" />
+            <TextField fx:id="soldPriceField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+            <Label text="Status: " GridPane.columnIndex="0" GridPane.rowIndex="6" />
+            <TextField fx:id="statusField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
             <BorderPane.margin>
                 <Insets bottom="15.0" />
@@ -32,7 +38,7 @@
     </top>
 
     <center>
-        <TableView fx:id="bid_table">
+        <TableView fx:id="bid_table" prefHeight="300.0">
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>

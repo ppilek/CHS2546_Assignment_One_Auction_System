@@ -94,7 +94,7 @@
               </Label>
             </children>
         </VBox>
-        <TextField fx:id="notificationField" layoutX="265.0" layoutY="25.0" prefHeight="35.0" prefWidth="620.0" />
+        <TextField fx:id="notificationField" layoutX="265.0" layoutY="25.0" prefHeight="35.0" prefWidth="773.0" />
 
         <TableView fx:id="lots_table_data" layoutX="257.0" layoutY="71.0" prefHeight="257.0" prefWidth="577.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="265.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="71.0">
             <columnResizePolicy>
@@ -106,12 +106,11 @@
                 <TableColumn fx:id="col_seller" text="Seller" />
                 <TableColumn fx:id="col_name" text="Name" />
                 <TableColumn fx:id="col_description" text="Description" />
-                <TableColumn fx:id="col_price" text="Price" />
+                <TableColumn fx:id="col_originalPrice" text="Price" />
+                <TableColumn fx:id="col_status" text="Status" />
+                <TableColumn fx:id="col_buyer" text="Buyer" />
             </columns>
         </TableView>
-
-        <Button fx:id="btn_accept" layoutX="973.0" layoutY="25.0" mnemonicParsing="false" onAction="#acceptButtonAction" prefHeight="35.0" text="Accept" />
-        <Button fx:id="btn_reject" layoutX="901.0" layoutY="25.0" mnemonicParsing="false" prefHeight="35.0" text="Reject" />
 
     </children>
 </AnchorPane>

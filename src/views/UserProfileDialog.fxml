@@ -19,8 +19,11 @@
             <Label text="Password: " GridPane.columnIndex="0" GridPane.rowIndex="2" />
             <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Label text="SignIn: " GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <TextField fx:id="isSingInField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Balance: " GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <TextField fx:id="balanceField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Label text="SignIn: " GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <TextField fx:id="isSingInField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
         </GridPane>
     </content>

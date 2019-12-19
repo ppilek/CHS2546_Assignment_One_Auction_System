@@ -2,14 +2,16 @@ package models;
 
 public class Lot {
 
-    String index, userSeller, title, description, price, userBuyer;
+    String index, userSeller, title, description, originalPrice, soldPrice, status, userBuyer;
 
-    public Lot(String index, String userSeller, String title, String description, String price, String userBuyer) {
+    public Lot(String index, String userSeller, String title, String description, String originalPrice, String soldPrice, String status, String userBuyer) {
         this.index = index;
         this.userSeller = userSeller;
         this.title = title;
         this.description = description;
-        this.price = price;
+        this.originalPrice = originalPrice;
+        this.soldPrice = soldPrice;
+        this.status = status;
         this.userBuyer = userBuyer;
     }
 
@@ -45,12 +47,28 @@ public class Lot {
         this.description = description;
     }
 
-    public String getPrice() {
-        return price;
+    public String getOriginalPrice() {
+        return originalPrice;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
+    public void setOriginalPrice(String originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public String getSoldPrice() {
+        return soldPrice;
+    }
+
+    public void setSoldPrice(String soldPrice) {
+        this.soldPrice = soldPrice;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getUserBuyer() {
@@ -68,7 +86,9 @@ public class Lot {
                 ", userSeller='" + userSeller + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", price='" + price + '\'' +
+                ", originalPrice='" + originalPrice + '\'' +
+                ", soldPrice='" + soldPrice + '\'' +
+                ", status='" + status + '\'' +
                 ", userBuyer='" + userBuyer + '\'' +
                 '}';
     }

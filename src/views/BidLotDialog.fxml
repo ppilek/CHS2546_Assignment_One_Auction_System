@@ -23,7 +23,7 @@
             <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="3" prefHeight="100.0" prefWidth="200.0" wrapText="true" />
 
             <Label text="Price: " GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <TextField fx:id="priceField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="originalPrice" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
             <Label text="Bid: " GridPane.columnIndex="0" GridPane.rowIndex="5" />
             <TextField fx:id="bitField" GridPane.columnIndex="1" GridPane.rowIndex="5" />

@@ -1,6 +1,6 @@
 package controllers;
 
-import entries.BuyNowEntry;
+import entries.NotificationEntry;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,13 +13,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javaspace.SpaceUtils;
+import models.Bid;
 import models.Lot;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.Lease;
-import net.jini.core.transaction.Transaction;
-import net.jini.core.transaction.TransactionFactory;
 import net.jini.core.transaction.server.TransactionManager;
 import net.jini.export.Exporter;
 import net.jini.jeri.BasicILFactory;
@@ -55,31 +54,24 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
     @FXML
     private TableColumn<Lot, String> col_description;
     @FXML
-    private TableColumn<Lot, String> col_price;
+    private TableColumn<Lot, String> col_originalPrice;
     @FXML
-    private Button btn_accept, btn_reject;
+    private TableColumn<Lot, String> col_status;
+    @FXML
+    private TableColumn<Lot, String> col_buyer;
 
     private String username = null;
     private UserController userController;
     private LotController lotController;
     private BidController bidController;
-    private BuyNowController saleController;
     private JavaSpace05 space;
     private TransactionManager transactionManager;
     private RemoteEventListener theStub;
+    private ObservableList<Lot> lots_data;
 
     public AuctionBoardController() {
         space = (JavaSpace05) SpaceUtils.getSpace();
-
-        // set up the security manager
-        if (System.getSecurityManager() == null)
-            System.setSecurityManager(new SecurityManager());
-
-        // Find the transaction manager on the network
         transactionManager = SpaceUtils.getManager();
-        if (transactionManager == null) {
-            System.err.println("Failed to find the transaction manager");
-        }
 
         // create the exporter
         Exporter myDefaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
@@ -90,8 +82,8 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
             theStub = (RemoteEventListener) myDefaultExporter.export(this);
 
             // add the listener
-            BuyNowEntry template = new BuyNowEntry(false);
-            space.notify(template, null, this.theStub, Lease.FOREVER, null);
+            NotificationEntry notificationTemplate = new NotificationEntry();
+            space.notify(notificationTemplate, null, this.theStub, Lease.FOREVER, null);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,18 +97,20 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         } else {
             setStatus(Color.GREEN, "JavaSpace: Connected");
         }
+        // set up the security manager
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
 
+        // Find the transaction manager on the network
+        if (transactionManager == null) {
+            System.err.println("Failed to find the transaction manager");
+        }
+
+        lots_data = FXCollections.observableArrayList();
+        lotController = new LotController(space, lots_data, lots_table_data);
+        bidController = new BidController(space, notificationField);
         notificationField.setEditable(false);
-
-        notificationField.setVisible(false);
-        btn_accept.setVisible(false);
-        btn_reject.setVisible(false);
-
-
-        ObservableList<Lot> lots_data = FXCollections.observableArrayList();
-        lotController = new LotController(space, lots_data);
-        bidController = new BidController(space);
-        saleController = new BuyNowController(space);
         initTable();
         loadData(lots_data);
     }
@@ -161,8 +155,8 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
 
     // ToDo buy know
     public void viewLotButtonAction(ActionEvent actionEvent) {
-        Lot selectedContact = lots_table_data.getSelectionModel().getSelectedItem();
-        if(selectedContact == null) {
+        Lot selectedLot = lots_table_data.getSelectionModel().getSelectedItem();
+        if(selectedLot == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("No Lot Selected");
             alert.setHeaderText(null);
@@ -184,20 +178,74 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
             return;
         }
 
+        ViewLotDialog viewLotDialog = fxmlLoader.getController();
+        viewLotDialog.showSelectedLot(bidController, selectedLot);
+
         ButtonType buyItNow = new ButtonType("Buy it now");
+        ButtonType acceptBid = new ButtonType("Accept Bid");
+        ButtonType withdrawLot = new ButtonType("Withdraw");
 
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-        dialog.getDialogPane().getButtonTypes().add(buyItNow);
 
-        ViewLotDialog viewLotDialog = fxmlLoader.getController();
-        viewLotDialog.showSelectedLot(bidController, selectedContact);
+        String userSeller = selectedLot.getUserSeller();
 
-        Button buyItNowButton = (Button) dialog.getDialogPane().lookupButton(buyItNow);
-        buyItNowButton.addEventHandler(ActionEvent.ACTION, e -> {
-            System.out.println("Pressed [Buy it now] button from ViewLotDialog");
-            saleController.addBuyNowToSpace(transactionManager, Integer.parseInt(selectedContact.getIndex()), getUsername());
+        if(selectedLot.getStatus().equals("pending")) {
+            if( !userSeller.equals(getUsername())) {
+                dialog.getDialogPane().getButtonTypes().add(buyItNow);
+                Button buyItNowButton = (Button) dialog.getDialogPane().lookupButton(buyItNow);
+                buyItNowButton.addEventHandler(ActionEvent.ACTION, e -> {
+                    System.out.println("Pressed [Buy it now] button from ViewLotDialog");
+                    lotController.addSoldLotToSpace(transactionManager, Integer.parseInt(selectedLot.getIndex()), getUsername(), Double.parseDouble(selectedLot.getOriginalPrice()));
 
-        });
+                });
+            }
+        }
+
+        if(userSeller.equals(getUsername())) {
+            if( !selectedLot.getStatus().equals("sold")) {
+                System.out.println("dodac button");
+                dialog.getDialogPane().getButtonTypes().add(acceptBid);
+
+                Button acceptBidButton = (Button) dialog.getDialogPane().lookupButton(acceptBid);
+                acceptBidButton.addEventHandler(ActionEvent.ACTION, e -> {
+                    System.out.println("Pressed [AcceptBidButton] button from ViewLotDialog");
+                    TableView<Bid>  listBids = viewLotDialog.getBid_table();
+                    Bid selectedBid = listBids.getSelectionModel().getSelectedItem();
+
+                    if(selectedBid == null) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("No Bid Selected");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Please select the bid.");
+                        alert.show();
+                        return;
+                    }
+
+                    lotController.acceptSelectedBidForSale(transactionManager, selectedLot, selectedBid);
+
+                });
+            } else {
+                dialog.getDialogPane().getButtonTypes().add(withdrawLot);
+
+                Button withdrawLotButton = (Button) dialog.getDialogPane().lookupButton(withdrawLot);
+                withdrawLotButton.addEventHandler(ActionEvent.ACTION, e -> {
+                    System.out.println("Pressed [WithdrawLotButton] button from ViewLotDialog");
+
+                    System.out.println("WithdrawLotButton: " + selectedLot.toString());
+                    // TAKE Bids from space if is something to take
+                    bidController.takeSelectedLotBidsFromSpace(Integer.parseInt(selectedLot.getIndex()));
+                    // Add price to user balance from lot
+                    System.out.println("Login: " + getUsername());
+                    getUserController().addSoldLotPriceToAccount(getUsername(), Double.parseDouble(selectedLot.getSoldPrice()));
+                    // Remove selected lot from space
+                    lotController.removeSelectedLotFromSpace(Integer.parseInt(selectedLot.getIndex()));
+                    lots_table_data.getItems().clear();
+                    loadData(lots_data);
+                });
+            }
+        } else {
+            System.out.println("nie dodawac button");
+        }
 
         dialog.showAndWait();
     }
@@ -214,37 +262,45 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
             return;
         }
 
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.initOwner(AuctionBoardAnchorPane.getScene().getWindow());
-        dialog.setTitle("Bid Lot");
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("/views/BidLotDialog.fxml"));
-        try {
-            dialog.getDialogPane().setContent(fxmlLoader.load());
-        } catch (IOException e) {
-            System.out.println("Couldn't load the dialog");
-            e.printStackTrace();
-            return;
-        }
-
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-
-
-        BidLotDialog bidLotDialog = fxmlLoader.getController();
-        bidLotDialog.showSelectedLot(selectedContact);
-
-        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        okButton.addEventFilter(ActionEvent.ACTION, e -> {
-            System.out.println("Pressed OK button from AddLotDialog");
-            if(bidLotDialog.checkBidPriceRequiredFields().equals("Error")) {
-                e.consume();
-            } else if(bidLotDialog.checkBidPriceRequiredFields().equals("Success")) {
-                bidLotDialog.bidSelectedLot(bidController, getUsername());
+        if(selectedContact.getStatus().equals("sold")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("SOLD");
+            alert.setHeaderText(null);
+            alert.setContentText("This lot is sold please bid another one.");
+            alert.showAndWait();
+        } else {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.initOwner(AuctionBoardAnchorPane.getScene().getWindow());
+            dialog.setTitle("Bid Lot");
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(getClass().getResource("/views/BidLotDialog.fxml"));
+            try {
+                dialog.getDialogPane().setContent(fxmlLoader.load());
+            } catch (IOException e) {
+                System.out.println("Couldn't load the dialog");
+                e.printStackTrace();
+                return;
             }
-        });
 
-        dialog.showAndWait();
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+
+            BidLotDialog bidLotDialog = fxmlLoader.getController();
+            bidLotDialog.showSelectedLot(selectedContact);
+
+            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.addEventFilter(ActionEvent.ACTION, e -> {
+                System.out.println("Pressed OK button from AddLotDialog");
+                if(bidLotDialog.checkBidPriceRequiredFields().equals("Error")) {
+                    e.consume();
+                } else if(bidLotDialog.checkBidPriceRequiredFields().equals("Success")) {
+                    bidLotDialog.bidSelectedLot(bidController, getUsername());
+                }
+            });
+
+            dialog.showAndWait();
+        }
     }
 
     // Done Add lot with validation fields
@@ -315,7 +371,9 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         col_seller.setCellValueFactory(new PropertyValueFactory<>("userSeller"));
         col_name.setCellValueFactory(new PropertyValueFactory<>("title"));
         col_description.setCellValueFactory(new PropertyValueFactory<>("description"));
-        col_price.setCellValueFactory(new PropertyValueFactory<>("price"));
+        col_originalPrice.setCellValueFactory(new PropertyValueFactory<>("originalPrice"));
+        col_status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        col_buyer.setCellValueFactory(new PropertyValueFactory<>("userBuyer"));
     }
 
     // Done
@@ -332,99 +390,45 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
 
     @Override
     public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-        BuyNowEntry buyNowEntryTemplate = new BuyNowEntry(false);
 
-        notificationField.setVisible(false);
-        btn_accept.setVisible(false);
-        btn_reject.setVisible(false);
+        NotificationEntry notificationEntryTemplate = new NotificationEntry();
+//        notificationEntryTemplate.setLotSeller(getUsername());
+
+//        lots_table_data.getItems().clear();
+        lots_table_data.refresh();
 
         try {
 
-            BuyNowEntry buyNowEntry = (BuyNowEntry) space.readIfExists(buyNowEntryTemplate, null, 3000);
+            NotificationEntry notificationEntry = (NotificationEntry) space.readIfExists(notificationEntryTemplate, null, 500);
 
-            if(buyNowEntry == null) {
-                System.out.println("notify: Error - No object found in space");
+            if(notificationEntry == null) {
+                System.out.println("Notification Entry no found in space.");
             } else {
-                System.out.println("notify: Object founded in space");
+                if(notificationEntry.getLotSeller().equals(getUsername())) {
+                    System.out.println("For Lot Seller");
 
-                String sellerUserName = buyNowEntry.getSellerUserName();
+                    notificationField.clear();
+                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
+                    notificationField.setText("!!! Sold !!! " + notificationEntry.getLotBuyer() + ", bought Lot: " + notificationEntry.getLotTitle() + ", for £" + notificationEntry.getLotPrice());
 
-                if(sellerUserName.equals(getUsername())) {
-                    System.out.println("notify: for me");
-
-                    notificationField.setVisible(true);
-                    btn_accept.setVisible(true);
-                    btn_reject.setVisible(true);
-                    notificationField.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
-                    notificationField.setText("User: " + buyNowEntry.getBuyerUserName() + ", want to buy [ " + buyNowEntry.getLotIndex() + " ] for £" + buyNowEntry.getLotIndex());
-
-                    btn_reject.addEventHandler(ActionEvent.ACTION, e -> {
-                        System.out.println("Pressed button reject");
-                        rejectButtonAction(buyNowEntry.getIndex());
-                        System.out.println("After btn_reject action");
-                        notificationField.setVisible(false);
-                        btn_accept.setVisible(false);
-                        btn_reject.setVisible(false);
-                    });
+                    System.out.println("Notify Sold Lot: " + notificationEntry.toString());
                 } else {
-                    System.out.println("notify: not for me");
+                    System.out.println("Not for Lot Seller");
                 }
+
+                if(notificationEntry.getBidAccepted() && notificationEntry.getLotBuyer().equals(getUsername())) {
+                    System.out.println("For Lot Buyer");
+                    notificationField.clear();
+                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
+                    notificationField.setText("!!! Sold !!! [ " + notificationEntry.getLotSeller() + "  ] accepted your bid, Lot: " + notificationEntry.getLotTitle() + ", bid: £" + notificationEntry.getLotPrice() );
+                } else {
+                    System.out.println("Not for Lot Buyer");
+                }
+
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    void acceptButtonAction(ActionEvent event) {
-        System.out.println("Accept");
-    }
-
-    public void rejectButtonAction(Integer index){
-
-        System.out.println("Reject");
-
-        try {
-            // First we need to create the transaction object
-            Transaction.Created trc = null;
-            try {
-                trc = TransactionFactory.create(transactionManager, 3000);
-            } catch (Exception e) {
-                System.out.println("REject Button Could not create transaction " + e);
-            }
-
-            Transaction txn = trc.transaction;
-
-            // Now take the initial object back out of the space...
-            try {
-                BuyNowEntry buyNowEntryTemplate = new BuyNowEntry(index);
-                BuyNowEntry buyNowEntry = (BuyNowEntry) space.take(buyNowEntryTemplate, txn, 2000);
-
-                if (buyNowEntry == null) {
-                    System.out.println("REject Button Error - No object found in space");
-                    txn.abort();
-                    System.exit(1);
-                } else {
-                    System.out.println("REject Button Read the initial buyNowEntry " + buyNowEntry.toString());
-                }
-
-                // ... edit that object and write it back again...
-                buyNowEntry.setAccepted(false);
-                buyNowEntry.setResponse(true);
-                space.write(buyNowEntry, txn, Lease.FOREVER);
-                System.out.println("REject Button Changed the buyNowEntry '" + buyNowEntry.toString() + "' and written it back to the space");
-
-            } catch (Exception e) {
-                System.out.println("REject Button Failed to read or write to space " + e);
-                txn.abort();
-                System.exit(1);
-            }
-            // ... and commit the transaction.
-            txn.commit();
-        } catch (Exception e) {
-            System.out.print("Transaction failed " + e);
-        }
-
     }
 }

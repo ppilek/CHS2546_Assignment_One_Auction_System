@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 public class UserProfileDialog implements Initializable {
 
     @FXML
-    private TextField indexField, usernameField, isSingInField;
+    private TextField indexField, usernameField, balanceField, isSingInField;
     @FXML
     private PasswordField passwordField;
 
@@ -21,6 +21,7 @@ public class UserProfileDialog implements Initializable {
         indexField.setEditable(false);
         usernameField.setEditable(false);
         passwordField.setEditable(false);
+        balanceField.setEditable(false);
         isSingInField.setEditable(false);
     }
 
@@ -31,6 +32,7 @@ public class UserProfileDialog implements Initializable {
         indexField.setText(String.valueOf(user.getIndex()));
         usernameField.setText(user.getUsername());
         passwordField.setText(user.getPassword());
+        balanceField.setText(String.valueOf(user.getBalance()));
         isSingInField.setText(String.valueOf(user.isSingIn()));
     }
 }

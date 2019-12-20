@@ -28,7 +28,7 @@ public class BidIndexU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "BidIndexEntry{" +
+        return "BidIndex{" +
                 "index=" + index +
                 '}';
     }

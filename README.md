@@ -10,19 +10,20 @@
 
 * Import the Apache-River-3.0.0
 * Import the JavaFX libraries
-* Run configuration of program to pass the following VM arguments: 
+
+Run configuration of program add the following VM arguments: 
 ```
 --module-path /usr/local/javafx-sdk-11.0.2/lib --add-modules=javafx.controls,javafx.fxml -Djava.security.policy=policy.all -Djava.rmi.server.useCodebaseOnly=false
 ```
 
-### Installing
+### Testing
 
-// ToDo - A step by step series of examples that tell you how to get a development env running
+* Import the JUnit5.4
 
-Say what the step will be
+Run junit testing add the following VM arguments:
 
 ```
-Give the example
+-Djava.security.policy=policy.all -Djava.rmi.server.useCodebaseOnly=false
 ```
 
 ## Built With

@@ -28,7 +28,7 @@ public class UserIndexU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "UserIndexEntry{" +
+        return "UserIndex{" +
                 "index=" + index +
                 '}';
     }

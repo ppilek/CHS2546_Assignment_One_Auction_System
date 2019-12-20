@@ -98,7 +98,7 @@ public class LotU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "LotEntry{" +
+        return "Lot{" +
                 "index=" + index +
                 ", userSeller='" + userSeller + '\'' +
                 ", title='" + title + '\'' +

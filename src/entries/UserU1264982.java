@@ -68,7 +68,7 @@ public class UserU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "UserEntry{" +
+        return "User{" +
                 "index=" + index +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +

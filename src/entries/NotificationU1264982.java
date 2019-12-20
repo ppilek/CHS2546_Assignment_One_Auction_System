@@ -84,7 +84,7 @@ public class NotificationU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "NotificationEntry{" +
+        return "Notification{" +
                 "lotIndex=" + lotIndex +
                 ", lotSeller='" + lotSeller + '\'' +
                 ", lotTitle='" + lotTitle + '\'' +

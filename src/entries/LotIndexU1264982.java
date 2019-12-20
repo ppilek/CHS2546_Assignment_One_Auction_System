@@ -28,7 +28,7 @@ public class LotIndexU1264982 implements Entry {
 
     @Override
     public String toString() {
-        return "LotIndexEntry{" +
+        return "LotIndex{" +
                 "index=" + index +
                 '}';
     }

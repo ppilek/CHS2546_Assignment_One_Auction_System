@@ -177,23 +177,6 @@ public class UserController {
         return status;
     }
 
-    private void addUserIndexToSpace() {
-        UserIndexU1264982 userIndexTemplate = new UserIndexU1264982();
-        try {
-            UserIndexU1264982 userIndexEntry = (UserIndexU1264982)space.readIfExists(userIndexTemplate,null, Long.MAX_VALUE);
-            if (userIndexEntry == null) {
-                try {
-                    UserIndexU1264982 user = new UserIndexU1264982(0);
-                    space.write(user, null, Lease.FOREVER);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public User readUserInfoFromSpace(String username) {
         User user = new User();
         try {
@@ -237,6 +220,23 @@ public class UserController {
             txn.commit();
         } catch (Exception e) {
             System.out.print("Transaction failed " + e);
+        }
+    }
+
+    private void addUserIndexToSpace() {
+        UserIndexU1264982 userIndexTemplate = new UserIndexU1264982();
+        try {
+            UserIndexU1264982 userIndexEntry = (UserIndexU1264982)space.readIfExists(userIndexTemplate,null, Long.MAX_VALUE);
+            if (userIndexEntry == null) {
+                try {
+                    UserIndexU1264982 user = new UserIndexU1264982(0);
+                    space.write(user, null, Lease.FOREVER);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

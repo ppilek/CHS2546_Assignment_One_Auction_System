@@ -1,10 +1,7 @@
 # Auction System - CHS2546, Distributed and Client Server Systems
 
-// ToDo - project description
 
 ## Getting Started
-
-// ToDo - These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 

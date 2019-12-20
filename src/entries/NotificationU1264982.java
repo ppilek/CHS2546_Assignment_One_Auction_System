@@ -2,7 +2,7 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class NotificationEntry implements Entry {
+public class NotificationU1264982 implements Entry {
 
     public Integer lotIndex;
     public String lotSeller;
@@ -12,11 +12,11 @@ public class NotificationEntry implements Entry {
     public Boolean isBidAccepted;
     public String lotBuyer;
 
-    public NotificationEntry() {
+    public NotificationU1264982() {
         // no arg constructor
     }
 
-    public NotificationEntry(Integer lotIndex, String lotSeller, String lotTitle, String lotDescription, Double lotPrice, Boolean isBidAccepted, String lotBuyer) {
+    public NotificationU1264982(Integer lotIndex, String lotSeller, String lotTitle, String lotDescription, Double lotPrice, Boolean isBidAccepted, String lotBuyer) {
         this.lotIndex = lotIndex;
         this.lotSeller = lotSeller;
         this.lotTitle = lotTitle;

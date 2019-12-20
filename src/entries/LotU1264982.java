@@ -2,7 +2,7 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class LotEntry implements Entry {
+public class LotU1264982 implements Entry {
 
     public Integer index;
     public String userSeller;
@@ -13,15 +13,15 @@ public class LotEntry implements Entry {
     public String status;
     public String userBuyer;
 
-    public LotEntry() {
+    public LotU1264982() {
         // no arg constructor
     }
 
-    public LotEntry(Integer index) {
+    public LotU1264982(Integer index) {
         this.index = index;
     }
 
-    public LotEntry(Integer index, String userSeller, String title, String description, Double originalPrice, Boolean isBid, Double soldPrice, String status, String userBuyer) {
+    public LotU1264982(Integer index, String userSeller, String title, String description, Double originalPrice, Boolean isBid, Double soldPrice, String status, String userBuyer) {
         this.index = index;
         this.userSeller = userSeller;
         this.title = title;

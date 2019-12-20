@@ -2,15 +2,15 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class UserIndexEntry implements Entry {
+public class BidIndexU1264982 implements Entry {
 
     public Integer index;
 
-    public UserIndexEntry() {
+    public BidIndexU1264982() {
         // no arg constructor
     }
 
-    public UserIndexEntry(Integer index) {
+    public BidIndexU1264982(Integer index) {
         this.index = index;
     }
 
@@ -26,13 +26,9 @@ public class UserIndexEntry implements Entry {
         index++;
     }
 
-    public void decrement() {
-        index--;
-    }
-
     @Override
     public String toString() {
-        return "UserIndexEntry{" +
+        return "BidIndexEntry{" +
                 "index=" + index +
                 '}';
     }

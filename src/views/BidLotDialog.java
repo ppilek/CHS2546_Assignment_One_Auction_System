@@ -8,6 +8,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import models.Lot;
+import net.jini.core.transaction.server.TransactionManager;
+
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -38,11 +40,11 @@ public class BidLotDialog implements Initializable {
         originalPrice.setText(lot.getOriginalPrice());
     }
 
-    public void bidSelectedLot(BidController bidController, String username) {
+    public void bidSelectedLot(TransactionManager transactionManager, BidController bidController, String username) {
         int lotIndex = Integer.parseInt(indexField.getText());
         double bidPrice = Double.parseDouble(bitField.getText());
 
-        bidController.bidLot(lotIndex, bidPrice, username);
+        bidController.bidLot(transactionManager, lotIndex, bidPrice, username);
     }
 
     public String checkBidPriceRequiredFields() {
@@ -68,7 +70,6 @@ public class BidLotDialog implements Initializable {
     private void setStatus(Color color, String text) {
         label_status.setTextFill(color);
         label_status.setText(text);
-        System.out.println(text);
     }
 
 }

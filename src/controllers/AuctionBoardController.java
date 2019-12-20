@@ -1,6 +1,6 @@
 package controllers;
 
-import entries.NotificationEntry;
+import entries.NotificationU1264982;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,25 +66,50 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
     private BidController bidController;
     private JavaSpace05 space;
     private TransactionManager transactionManager;
-    private RemoteEventListener theStub;
     private ObservableList<Lot> lots_data;
 
     public AuctionBoardController() {
-        space = (JavaSpace05) SpaceUtils.getSpace();
+        // Set up the security manager
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+            System.out.println("New Security Manager was added.");
+        } else {
+            System.out.println("Security Manager exist.");
+        }
+
+        // Find the transaction manager on the network
         transactionManager = SpaceUtils.getManager();
+        if (transactionManager == null) {
+            System.err.println("Failed to find the Transaction Manager");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to find the Transaction Manager");
+            alert.showAndWait();
+            System.exit(1);
+        } else {
+            System.out.println("Transaction Manger exist.");
+        }
 
-        // create the exporter
+        // Find the Java Space on the network
+        space = (JavaSpace05) SpaceUtils.getSpace();
+        if (space == null) {
+            System.err.println("Failed to find the JavaSpace");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to find the JavaSpace");
+            alert.showAndWait();
+            System.exit(1);
+        } else {
+            System.out.println("Connected to JavaSpace");
+        }
+
         Exporter myDefaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
-
         try {
-            // register this as a remote object
-            // and get a reference to the 'stub'
-            theStub = (RemoteEventListener) myDefaultExporter.export(this);
-
-            // add the listener
-            NotificationEntry notificationTemplate = new NotificationEntry();
-            space.notify(notificationTemplate, null, this.theStub, Lease.FOREVER, null);
-
+            RemoteEventListener remoteEventListener = (RemoteEventListener) myDefaultExporter.export(this);
+            NotificationU1264982 notificationTemplate = new NotificationU1264982();
+            space.notify(notificationTemplate, null, remoteEventListener, Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,16 +122,6 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         } else {
             setStatus(Color.GREEN, "JavaSpace: Connected");
         }
-        // set up the security manager
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new SecurityManager());
-        }
-
-        // Find the transaction manager on the network
-        if (transactionManager == null) {
-            System.err.println("Failed to find the transaction manager");
-        }
-
         lots_data = FXCollections.observableArrayList();
         lotController = new LotController(space, lots_data, lots_table_data);
         bidController = new BidController(space, notificationField);
@@ -131,7 +146,6 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         this.username = username;
     }
 
-    // Done
     public void signOutButtonAction(ActionEvent actionEvent) {
         System.out.println(getUsername());
         System.out.println(userController.readUserInfoFromSpace(getUsername()).toString());
@@ -148,14 +162,12 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
                 Platform.exit();
                 System.exit(0);
             }
-        } else {
-            System.out.println("Cancel");
         }
     }
 
-    // ToDo buy know
     public void viewLotButtonAction(ActionEvent actionEvent) {
         Lot selectedLot = lots_table_data.getSelectionModel().getSelectedItem();
+
         if(selectedLot == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("No Lot Selected");
@@ -173,7 +185,6 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         try {
             dialog.getDialogPane().setContent(fxmlLoader.load());
         } catch (IOException e) {
-            System.out.println("Couldn't load the dialog");
             e.printStackTrace();
             return;
         }
@@ -194,24 +205,18 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
                 dialog.getDialogPane().getButtonTypes().add(buyItNow);
                 Button buyItNowButton = (Button) dialog.getDialogPane().lookupButton(buyItNow);
                 buyItNowButton.addEventHandler(ActionEvent.ACTION, e -> {
-                    System.out.println("Pressed [Buy it now] button from ViewLotDialog");
-                    lotController.addSoldLotToSpace(transactionManager, Integer.parseInt(selectedLot.getIndex()), getUsername(), Double.parseDouble(selectedLot.getOriginalPrice()));
-
+                    lotController.updateLot(transactionManager, Integer.parseInt(selectedLot.getIndex()), getUsername(), Double.parseDouble(selectedLot.getOriginalPrice()));
                 });
             }
         }
 
         if(userSeller.equals(getUsername())) {
             if( !selectedLot.getStatus().equals("sold")) {
-                System.out.println("dodac button");
                 dialog.getDialogPane().getButtonTypes().add(acceptBid);
-
                 Button acceptBidButton = (Button) dialog.getDialogPane().lookupButton(acceptBid);
                 acceptBidButton.addEventHandler(ActionEvent.ACTION, e -> {
-                    System.out.println("Pressed [AcceptBidButton] button from ViewLotDialog");
                     TableView<Bid>  listBids = viewLotDialog.getBid_table();
                     Bid selectedBid = listBids.getSelectionModel().getSelectedItem();
-
                     if(selectedBid == null) {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("No Bid Selected");
@@ -220,22 +225,15 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
                         alert.show();
                         return;
                     }
-
-                    lotController.acceptSelectedBidForSale(transactionManager, selectedLot, selectedBid);
-
+                    lotController.acceptSelectedBid(transactionManager, selectedLot, selectedBid);
                 });
             } else {
                 dialog.getDialogPane().getButtonTypes().add(withdrawLot);
-
                 Button withdrawLotButton = (Button) dialog.getDialogPane().lookupButton(withdrawLot);
                 withdrawLotButton.addEventHandler(ActionEvent.ACTION, e -> {
-                    System.out.println("Pressed [WithdrawLotButton] button from ViewLotDialog");
-
-                    System.out.println("WithdrawLotButton: " + selectedLot.toString());
-                    // TAKE Bids from space if is something to take
+                    // Take bids from space if is something to take
                     bidController.takeSelectedLotBidsFromSpace(Integer.parseInt(selectedLot.getIndex()));
-                    // Add price to user balance from lot
-                    System.out.println("Login: " + getUsername());
+                    // Add lot sold price to user balance
                     getUserController().addSoldLotPriceToAccount(getUsername(), Double.parseDouble(selectedLot.getSoldPrice()));
                     // Remove selected lot from space
                     lotController.removeSelectedLotFromSpace(Integer.parseInt(selectedLot.getIndex()));
@@ -243,14 +241,10 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
                     loadData(lots_data);
                 });
             }
-        } else {
-            System.out.println("nie dodawac button");
         }
-
         dialog.showAndWait();
     }
 
-    // Done
     public void bitLotButtonAction(ActionEvent actionEvent) {
         Lot selectedContact = lots_table_data.getSelectionModel().getSelectedItem();
         if(selectedContact == null) {
@@ -277,14 +271,11 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
             try {
                 dialog.getDialogPane().setContent(fxmlLoader.load());
             } catch (IOException e) {
-                System.out.println("Couldn't load the dialog");
                 e.printStackTrace();
                 return;
             }
-
             dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
             dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-
 
             BidLotDialog bidLotDialog = fxmlLoader.getController();
             bidLotDialog.showSelectedLot(selectedContact);
@@ -295,15 +286,13 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
                 if(bidLotDialog.checkBidPriceRequiredFields().equals("Error")) {
                     e.consume();
                 } else if(bidLotDialog.checkBidPriceRequiredFields().equals("Success")) {
-                    bidLotDialog.bidSelectedLot(bidController, getUsername());
+                    bidLotDialog.bidSelectedLot(transactionManager, bidController, getUsername());
                 }
             });
-
             dialog.showAndWait();
         }
     }
 
-    // Done Add lot with validation fields
     public void addLotButtonAction(ActionEvent actionEvent) {
         Dialog<ButtonType> dialog = new Dialog<ButtonType>();
         dialog.initOwner(AuctionBoardAnchorPane.getScene().getWindow());
@@ -312,9 +301,7 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         fxmlLoader.setLocation(getClass().getResource("/views/AddLotDialog.fxml"));
         try {
             dialog.getDialogPane().setContent(fxmlLoader.load());
-
         } catch (IOException e) {
-            System.out.println("Couldn't load the dialog");
             e.printStackTrace();
             return;
         }
@@ -326,18 +313,15 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
         okButton.addEventFilter(ActionEvent.ACTION, e -> {
-            System.out.println("Pressed OK button from AddLotDialog");
             if(addLotDialog.checkRequiredFields().equals("Error")) {
                 e.consume();
             } else if(addLotDialog.checkRequiredFields().equals("Success")) {
                 addLotDialog.newLot(transactionManager, lotController, getUsername());
             }
         });
-
         dialog.showAndWait();
     }
 
-    // Done display user info
     public void userProfileButtonAction(ActionEvent actionEvent) {
         Dialog<ButtonType> dialog = new Dialog<ButtonType>();
         dialog.initOwner(AuctionBoardAnchorPane.getScene().getWindow());
@@ -346,9 +330,7 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         fxmlLoader.setLocation(getClass().getResource("/views/UserProfileDialog.fxml"));
         try {
             dialog.getDialogPane().setContent(fxmlLoader.load());
-
         } catch (IOException e) {
-            System.out.println("Couldn't load the dialog");
             e.printStackTrace();
             return;
         }
@@ -360,12 +342,44 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         dialog.showAndWait();
     }
 
-    // Done
+    @Override
+    public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
+
+        NotificationU1264982 notificationEntryTemplate = new NotificationU1264982();
+
+        try {
+
+            NotificationU1264982 notificationEntry = (NotificationU1264982) space.readIfExists(notificationEntryTemplate, null, 500);
+
+            if(notificationEntry == null) {
+                System.out.println("Notification no found.");
+            } else {
+                if(notificationEntry.getLotSeller().equals(getUsername())) {
+
+                    notificationField.clear();
+                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
+                    notificationField.setText("!!! Sold !!! " + notificationEntry.getLotBuyer() + ", bought Lot: " + notificationEntry.getLotTitle() + ", for £" + notificationEntry.getLotPrice());
+                    lots_data.clear();
+                    loadData(lots_data);
+                }
+
+                if(notificationEntry.getBidAccepted() && notificationEntry.getLotBuyer().equals(getUsername())) {
+                    notificationField.clear();
+                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
+                    notificationField.setText("!!! Sold !!! [ " + notificationEntry.getLotSeller() + "  ] accepted your bid, Lot: " + notificationEntry.getLotTitle() + ", bid: £" + notificationEntry.getLotPrice() );
+                    lots_data.clear();
+                    loadData(lots_data);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void initTable() {
         initCols();
     }
 
-    // Done
     private void initCols() {
         col_index.setCellValueFactory(new PropertyValueFactory<>("index"));
         col_seller.setCellValueFactory(new PropertyValueFactory<>("userSeller"));
@@ -376,59 +390,12 @@ public class AuctionBoardController implements Initializable, RemoteEventListene
         col_buyer.setCellValueFactory(new PropertyValueFactory<>("userBuyer"));
     }
 
-    // Done
     private void loadData(ObservableList<Lot> lots_data) {
         lots_table_data.setItems(lotController.loadLotsFromSpace(lots_data));
     }
 
-    // Done
     private void setStatus(Color color, String text) {
         label_status.setTextFill(color);
         label_status.setText(text);
-        System.out.println(text);
-    }
-
-    @Override
-    public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-
-        NotificationEntry notificationEntryTemplate = new NotificationEntry();
-//        notificationEntryTemplate.setLotSeller(getUsername());
-
-//        lots_table_data.getItems().clear();
-        lots_table_data.refresh();
-
-        try {
-
-            NotificationEntry notificationEntry = (NotificationEntry) space.readIfExists(notificationEntryTemplate, null, 500);
-
-            if(notificationEntry == null) {
-                System.out.println("Notification Entry no found in space.");
-            } else {
-                if(notificationEntry.getLotSeller().equals(getUsername())) {
-                    System.out.println("For Lot Seller");
-
-                    notificationField.clear();
-                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
-                    notificationField.setText("!!! Sold !!! " + notificationEntry.getLotBuyer() + ", bought Lot: " + notificationEntry.getLotTitle() + ", for £" + notificationEntry.getLotPrice());
-
-                    System.out.println("Notify Sold Lot: " + notificationEntry.toString());
-                } else {
-                    System.out.println("Not for Lot Seller");
-                }
-
-                if(notificationEntry.getBidAccepted() && notificationEntry.getLotBuyer().equals(getUsername())) {
-                    System.out.println("For Lot Buyer");
-                    notificationField.clear();
-                    notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
-                    notificationField.setText("!!! Sold !!! [ " + notificationEntry.getLotSeller() + "  ] accepted your bid, Lot: " + notificationEntry.getLotTitle() + ", bid: £" + notificationEntry.getLotPrice() );
-                } else {
-                    System.out.println("Not for Lot Buyer");
-                }
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

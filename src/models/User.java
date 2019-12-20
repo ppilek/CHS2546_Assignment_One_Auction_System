@@ -8,7 +8,7 @@ public class User {
     public double balance;
 
     public User() {
-
+        // no arg constructor
     }
 
     public User(int index, String username, String password, boolean isSingIn, double balance) {

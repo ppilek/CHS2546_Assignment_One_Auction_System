@@ -15,15 +15,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javaspace.SpaceUtils;
-import net.jini.space.JavaSpace05;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
 
-    double x, y = 0;
+    private double x, y = 0;
 
     @FXML
     private TextField txtUsername;
@@ -38,12 +36,9 @@ public class LoginController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        JavaSpace05 space = (JavaSpace05) SpaceUtils.getSpace();
-        userController  = new UserController(space);
+        userController  = new UserController();
 
-        if (space == null) {
-            setStatus(Color.TOMATO, "JavaSpace: Check connection");
-        } else {
+        if (!(userController.getSpace() == null)) {
             setStatus(Color.GREEN, "JavaSpace: Connected");
         }
     }
@@ -63,7 +58,8 @@ public class LoginController implements Initializable {
 
                     Stage stageOne = new Stage(StageStyle.TRANSPARENT);
                     stageOne.getIcons().add(new Image("images/icon.png"));
-                    //grab your root
+
+                    //grab root
                     root.setOnMousePressed(e -> {
                         x = e.getSceneX();
                         y = e.getSceneY();
@@ -108,24 +104,21 @@ public class LoginController implements Initializable {
     }
 
     private String signIn() {
-        String status = "Success";
+        String status;
         String username = txtUsername.getText();
         String password = txtPassword.getText();
+
         if(username.isEmpty() || password.isEmpty()) {
-//            setLabelError(Color.TOMATO, "Empty credentials");
             status = "Empty credentials";
         } else {
-//            System.out.println(userController.singIn(username, password));
             status = userController.singInToSpace(username, password);
         }
 
         return status;
     }
 
-
     private void setStatus(Color color, String text) {
         label_status.setTextFill(color);
         label_status.setText(text);
-        System.out.println(text);
     }
 }

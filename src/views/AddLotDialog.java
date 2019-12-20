@@ -7,7 +7,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import net.jini.core.transaction.server.TransactionManager;
-
 import java.util.regex.Pattern;
 
 public class AddLotDialog {
@@ -26,7 +25,7 @@ public class AddLotDialog {
         String description = descriptionField.getText();
         double price = Double.parseDouble(priceField.getText());
 
-        lotController.addLotToSpace(transactionManager, username, name, description, price);
+        lotController.addLot(transactionManager, username, name, description, price);
     }
 
     public String checkRequiredFields() {
@@ -53,6 +52,5 @@ public class AddLotDialog {
     private void setStatus(Color color, String text) {
         label_status.setTextFill(color);
         label_status.setText(text);
-        System.out.println(text);
     }
 }

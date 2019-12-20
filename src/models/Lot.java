@@ -2,7 +2,7 @@ package models;
 
 public class Lot {
 
-    String index, userSeller, title, description, originalPrice, soldPrice, status, userBuyer;
+    public String index, userSeller, title, description, originalPrice, soldPrice, status, userBuyer;
 
     public Lot(String index, String userSeller, String title, String description, String originalPrice, String soldPrice, String status, String userBuyer) {
         this.index = index;

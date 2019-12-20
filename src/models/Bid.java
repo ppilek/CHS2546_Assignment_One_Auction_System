@@ -2,7 +2,7 @@ package models;
 
 public class Bid {
 
-    String index, bidValue, user;
+    public String index, bidValue, user;
 
     public Bid(String index, String bidValue, String user) {
         this.index = index;

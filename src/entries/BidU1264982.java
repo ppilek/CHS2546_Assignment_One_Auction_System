@@ -2,22 +2,22 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class BidEntry implements Entry {
+public class BidU1264982 implements Entry {
 
     public Integer index;
     public Integer lotIndex;
     public Double bidValue;
     public String userBuyer;
 
-    public BidEntry() {
+    public BidU1264982() {
         // no arg constructor
     }
 
-    public BidEntry(Integer lotIndex) {
+    public BidU1264982(Integer lotIndex) {
         this.lotIndex = lotIndex;
     }
 
-    public BidEntry(Integer index, Integer lotIndex, Double bidValue, String userBuyer) {
+    public BidU1264982(Integer index, Integer lotIndex, Double bidValue, String userBuyer) {
         this.index = index;
         this.lotIndex = lotIndex;
         this.bidValue = bidValue;

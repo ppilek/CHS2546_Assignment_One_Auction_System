@@ -8,10 +8,11 @@
 
 ### Prerequisites
 
-// ToDo - What things you need to install the software and how to install them
-
+* Import the Apache-River-3.0.0
+* Import the JavaFX libraries
+* Run configuration of program to pass the following VM arguments: 
 ```
-Give examples
+--module-path /usr/local/javafx-sdk-11.0.2/lib --add-modules=javafx.controls,javafx.fxml -Djava.security.policy=policy.all -Djava.rmi.server.useCodebaseOnly=false
 ```
 
 ### Installing

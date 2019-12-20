@@ -53,7 +53,6 @@ public class ViewLotDialog implements Initializable  {
         col_user.setCellValueFactory(new PropertyValueFactory<>("user"));
     }
 
-
     private void loadData(BidController bitController, ObservableList<Bid> bits_data, int lotId) {
         bid_table.setItems(bitController.loadBidsFromSpace(bits_data, lotId));
     }
@@ -74,7 +73,4 @@ public class ViewLotDialog implements Initializable  {
         return bid_table;
     }
 
-//    public void setBid_table(TableView<Bid> bid_table) {
-//        this.bid_table = bid_table;
-//    }
 }

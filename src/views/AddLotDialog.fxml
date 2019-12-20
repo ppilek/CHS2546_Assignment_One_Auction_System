@@ -21,7 +21,6 @@
 
             <Label fx:id="label_status" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-
         </GridPane>
     </content>
 

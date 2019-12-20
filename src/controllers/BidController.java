@@ -1,8 +1,8 @@
 package controllers;
 
-import entries.BidEntry;
-import entries.BidIndexEntry;
-import entries.LotEntry;
+import entries.BidU1264982;
+import entries.BidIndexU1264982;
+import entries.LotU1264982;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TextField;
 import models.Bid;
@@ -11,7 +11,9 @@ import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.Lease;
-import net.jini.core.transaction.TransactionException;
+import net.jini.core.transaction.Transaction;
+import net.jini.core.transaction.TransactionFactory;
+import net.jini.core.transaction.server.TransactionManager;
 import net.jini.export.Exporter;
 import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
@@ -25,49 +27,44 @@ import java.util.Collection;
 public class BidController implements RemoteEventListener {
 
     private JavaSpace05 space;
-    private RemoteEventListener theStub;
     private TextField notificationField;
 
     public BidController(JavaSpace05 space, TextField notificationField) {
         this.space = space;
         this.notificationField = notificationField;
-        addBidIndexToSpace();
 
-        // create the exporter
         Exporter myDefaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
 
         try {
-            // register this as a remote object
-            // and get a reference to the 'stub'
-            theStub = (RemoteEventListener) myDefaultExporter.export(this);
+            RemoteEventListener remoteEventListener = (RemoteEventListener) myDefaultExporter.export(this);
 
-            // add the listener
-            BidEntry bidEntryTemplate = new BidEntry();
-            space.notify(bidEntryTemplate, null, this.theStub, Lease.FOREVER, null);
-
+            BidU1264982 bidTemplate = new BidU1264982();
+            space.notify(bidTemplate, null, remoteEventListener, Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        addBidIndexToSpace();
     }
 
     public ObservableList<Bid> loadBidsFromSpace(ObservableList<Bid> bids_data, int lotId ) {
-        Collection<BidEntry> list = new ArrayList<BidEntry>();
+        Collection<BidU1264982> list = new ArrayList<BidU1264982>();
 
-        BidEntry template = new BidEntry();
+        BidU1264982 template = new BidU1264982();
         template.setLotIndex(lotId);
         list.add(template);
-        BidEntry bidEntry = null;
+        BidU1264982 bid;
 
         try {
-            MatchSet allBitsForLotId = space.contents(list, null, 5L * 60000L, Integer.MAX_VALUE);
-            while (allBitsForLotId != null) {
+            MatchSet allBits = space.contents(list, null, 5L * 60000L, Integer.MAX_VALUE);
+            while (allBits != null) {
                 try {
-                    bidEntry = (BidEntry) allBitsForLotId.next();
-                    if (bidEntry == null)
+                    bid = (BidU1264982) allBits.next();
+                    if (bid == null)
                         break;
                     else {
-                        System.out.println(bidEntry.toString());
-                        bids_data.add(new Bid(String.valueOf(bidEntry.getIndex()), String.valueOf(bidEntry.getBidValue()), bidEntry.getUserBuyer()));
+                        System.out.println(bid.toString());
+                        bids_data.add(new Bid(String.valueOf(bid.getIndex()), String.valueOf(bid.getBidValue()), bid.getUserBuyer()));
                     }
                 } catch (UnusableEntryException uee) {
                     uee.printStackTrace();
@@ -80,83 +77,63 @@ public class BidController implements RemoteEventListener {
         return bids_data;
     }
 
-    public void bidLot(int lotIndex, double bidValue, String userBuyer) {
+    // Bid selected lot with bid value, userBid and transaction manager
+    public void bidLot(TransactionManager transactionManager, int lotIndex, double bidValue, String userBid) {
         try {
-            BidIndexEntry bidIndexTemplate = new BidIndexEntry();
-            BidIndexEntry bidIndex = (BidIndexEntry) space.take(bidIndexTemplate, null, Long.MAX_VALUE);
-            System.out.println("Bid Index before: " + bidIndex.toString());
-
-            if(bidIndex == null){
-                System.out.println("Bid Index not found.");
-                System.exit(1);
+            Transaction.Created trc = null;
+            try {
+                trc = TransactionFactory.create(transactionManager, 2000);
+            } catch (Exception e) {
+                System.out.println("Could not create transaction " + e);
             }
-
-            int index = bidIndex.getIndex();
-
-            BidEntry newBid = new BidEntry(index, lotIndex, bidValue, userBuyer);
-            space.write(newBid, null, Lease.FOREVER);
-            System.out.println("New Bid was added to space: " + newBid.toString());
-
-            bidIndex.increment();
-            space.write(bidIndex, null, Lease.FOREVER);
-            System.out.println("Bid Index after: " + bidIndex.toString());
-
-        }  catch ( Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void addBidIndexToSpace() {
-        BidIndexEntry bidIndexTemplate = new BidIndexEntry();
-        try {
-            BidIndexEntry bidIndex = (BidIndexEntry)space.readIfExists(bidIndexTemplate,null, Long.MAX_VALUE);
-            if (bidIndex == null) {
-                try {
-                    BidIndexEntry bid = new BidIndexEntry(0);
-                    space.write(bid, null, Lease.FOREVER);
-                    System.out.println("First bid index was added to space.\n");
-                } catch (Exception e) {
-                    e.printStackTrace();
+            Transaction txn = trc.transaction;
+            try {
+                BidIndexU1264982 bidIndexTemplate = new BidIndexU1264982();
+                BidIndexU1264982 bidIndex = (BidIndexU1264982) space.take(bidIndexTemplate, txn, Long.MAX_VALUE);
+                if(bidIndex == null){
+                    System.err.println("Bid Index not found.");
+                } else {
+                    int index = bidIndex.getIndex();
+                    BidU1264982 newBid = new BidU1264982(index, lotIndex, bidValue, userBid);
+                    space.write(newBid, null, Lease.FOREVER);
+                    bidIndex.increment();
+                    space.write(bidIndex, txn, Lease.FOREVER);
                 }
-            } else {
-                System.out.println("Bid index is in the space.\n");
+            }  catch ( Exception e) {
+                e.printStackTrace();
             }
+            txn.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.print("Transaction failed " + e);
         }
     }
 
     @Override
     public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-        BidIndexEntry bidIndexEntryTemplate = new BidIndexEntry();
-        BidEntry bidEntryTemplate = new BidEntry();
+        BidIndexU1264982 bidIndexTemplate = new BidIndexU1264982();
+        BidU1264982 bidTemplate = new BidU1264982();
 
         try {
-            BidIndexEntry bidIndex = (BidIndexEntry) space.readIfExists(bidIndexEntryTemplate, null, 1000);
+            BidIndexU1264982 bidIndex = (BidIndexU1264982) space.readIfExists(bidIndexTemplate, null, 1000);
             if(bidIndex == null) {
-                System.out.println("BidIndexEntry object no found in space.");
+                System.out.println("BidIndex object no found in space");
             } else {
-                bidEntryTemplate.setIndex(bidIndex.getIndex() - 1);
+                bidTemplate.setIndex(bidIndex.getIndex() - 1);
 
-                BidEntry bidEntryResult = (BidEntry) space.readIfExists(bidEntryTemplate, null, 1000);
+                BidU1264982 bidResult = (BidU1264982) space.readIfExists(bidTemplate, null, 1000);
 
-                if(bidEntryResult == null) {
-                    System.out.println("Lot not found wit bid entry");
+                if(bidResult == null) {
+                    System.out.println("Bid result not found");
                 } else {
-                    LotEntry lotEntryTemplate = new LotEntry(bidEntryResult.getLotIndex());
+                    LotU1264982 lotTemplate = new LotU1264982(bidResult.getLotIndex());
+                    LotU1264982 lot = (LotU1264982) space.readIfExists(lotTemplate, null, 1000);
 
-                    LotEntry lotEntry = (LotEntry) space.readIfExists(lotEntryTemplate, null, 1000);
-
-                    if(lotEntry == null) {
-                        System.out.println("Lot not found wit bid entry");
+                    if(lot == null) {
+                        System.out.println("Lot not found");
                     } else {
-                        System.out.println("Notification from Bid: " + bidEntryResult.toString());
-                        System.out.println("Notification from Lot:" + lotEntry.toString());
-
                         notificationField.clear();
                         notificationField.setStyle("-fx-text-fill: #1620A1; -fx-font-size: 14px;");
-                        notificationField.setText("User: [ " + bidEntryResult.getUserBuyer() + " ], bid lot: [ " + lotEntry.getTitle() + " ], price: £" + bidEntryResult.getBidValue());
+                        notificationField.setText("User: [ " + bidResult.getUserBuyer() + " ], bid lot: [ " + lot.getTitle() + " ], price: £" + bidResult.getBidValue());
                     }
                 }
             }
@@ -166,30 +143,37 @@ public class BidController implements RemoteEventListener {
     }
 
     public void takeSelectedLotBidsFromSpace(int lotIndex) {
-        BidEntry bidEntryTemplate = new BidEntry(lotIndex);
-        // Take all lots that match our template back out of the space
-        // This is just to tidy up, really.
-        int bidsTaken = 0;
+        BidU1264982 bidTemplate = new BidU1264982(lotIndex);
+
         boolean somethingToTake = true;
 
-        System.out.println("\n\nStarting to remove all the Bids for Lot from the space...\n");
-
+        // Starting to remove all the Bids belongs to Lot from the space
         while(somethingToTake) {
             try {
-                BidEntry bidEntry = (BidEntry) space.takeIfExists(bidEntryTemplate, null, 0);
-
-                if(bidEntry != null) {
-                    System.out.println("Removed a Bid with ID " + bidEntry.getIndex());
-                    bidsTaken++;
-                } else {
+                BidU1264982 bidEntry = (BidU1264982) space.takeIfExists(bidTemplate, null, 0);
+                if(bidEntry == null) {
                     somethingToTake = false;
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
 
-        System.out.println("\nRemove ended. " + bidsTaken + " bids were removed from the space\n");
+    private void addBidIndexToSpace() {
+        BidIndexU1264982 bidIndexTemplate = new BidIndexU1264982();
+        try {
+            BidIndexU1264982 bidIndex = (BidIndexU1264982)space.readIfExists(bidIndexTemplate,null, Long.MAX_VALUE);
+            if (bidIndex == null) {
+                try {
+                    BidIndexU1264982 bid = new BidIndexU1264982(0);
+                    space.write(bid, null, Lease.FOREVER);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -12,8 +12,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javaspace.SpaceUtils;
-import net.jini.space.JavaSpace05;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -33,11 +31,10 @@ public class RegisterController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        JavaSpace05 space = (JavaSpace05) SpaceUtils.getSpace();
-        userController  = new UserController(space);
-        if (space == null) {
-            setStatus(Color.TOMATO, "JavaSpace: Check connection");
-        } else {
+
+        userController  = new UserController();
+
+        if (!(userController.getSpace() == null)) {
             setStatus(Color.GREEN, "JavaSpace: Connected");
         }
     }
@@ -72,16 +69,13 @@ public class RegisterController implements Initializable {
     }
 
     private String signUp() {
-        String status = "Success";
+        String status;
         String username = txtUsername.getText();
         String password = txtPassword.getText();
         if(username.isEmpty() || password.isEmpty()) {
-//            setLabelError(Color.TOMATO, "Empty credentials");
             status = "Empty credentials";
         } else {
-//            System.out.println(userController.singUpToSpace(username, password));
             status = userController.singUpToSpace(username, password);
-//            System.out.println(status);
         }
         return status;
     }
@@ -89,6 +83,5 @@ public class RegisterController implements Initializable {
     private void setStatus(Color color, String text) {
         label_status.setTextFill(color);
         label_status.setText(text);
-        System.out.println(text);
     }
 }

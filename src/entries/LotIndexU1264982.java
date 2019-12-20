@@ -2,15 +2,15 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class LotIndexEntry implements Entry {
+public class LotIndexU1264982 implements Entry {
 
     public Integer index;
 
-    public LotIndexEntry(){
+    public LotIndexU1264982(){
         // no arg constructor
     }
 
-    public LotIndexEntry(int index){
+    public LotIndexU1264982(int index){
         this.index = index;
     }
 
@@ -24,10 +24,6 @@ public class LotIndexEntry implements Entry {
 
     public void increment(){
         index++;
-    }
-
-    public void decrement() {
-        index--;
     }
 
     @Override

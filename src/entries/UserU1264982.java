@@ -2,7 +2,7 @@ package entries;
 
 import net.jini.core.entry.Entry;
 
-public class UserEntry implements Entry {
+public class UserU1264982 implements Entry {
 
     public Integer index;
     public String username;
@@ -10,15 +10,15 @@ public class UserEntry implements Entry {
     public Boolean isSingIn;
     public Double balance;
 
-    public UserEntry() {
+    public UserU1264982() {
         // no arg constructor
     }
 
-    public UserEntry(String username) {
+    public UserU1264982(String username) {
         this.username = username;
     }
 
-    public UserEntry(Integer index, String username, String password, Boolean isSingIn, Double balance) {
+    public UserU1264982(Integer index, String username, String password, Boolean isSingIn, Double balance) {
         this.index = index;
         this.username = username;
         this.password = password;
